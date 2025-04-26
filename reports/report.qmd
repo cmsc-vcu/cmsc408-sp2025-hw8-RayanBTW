@@ -96,11 +96,11 @@ select
 from
     world_bank_data.wdi_country
 where
-    region = '' or region is null
+    `region` is NULL
 
 """)
 ```
-
+  
 ## Task 4
 
 Create your own copy of WDI_Country containing just countries.
