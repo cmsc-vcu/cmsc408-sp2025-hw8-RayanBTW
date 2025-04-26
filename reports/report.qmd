@@ -96,7 +96,8 @@ select
 from
     world_bank_data.wdi_country
 where
-    region is NULL
+    region = '' or region is null
+
 """)
 ```
 
