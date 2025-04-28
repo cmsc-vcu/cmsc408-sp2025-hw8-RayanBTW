@@ -95,7 +95,7 @@ SELECT `Short Name` FROM world_bank_data.wdi_country WHERE `Region` IS NULL;
 """)
 
 ```
-  
+g
 ## Task 4
 
 Create your own copy of WDI_Country containing just countries.
@@ -109,90 +109,66 @@ Create your own copy of WDI_Country containing just countries.
 ## (skills: select, aggregate)
 
 # drop table
-execute_ddl(cnx, """
-drop table if exists wdi_country;
+execute_ddl(cnx,"""
+DROP TABLE IF EXISTS wdi_country;
 """)
 ```
 
 ```{python}
 # create table
-execute_ddl(cnx, """
-create table wdi_country as
-select * from world_bank_data.wdi_country
-where region is not NULL
+execute_ddl(cnx,"""
+CREATE TABLE wdi_country AS 
+    SELECT * FROM world_bank_data.wdi_country
+    WHERE `Region` IS NOT NULL;
 """)
 ```
 
 ```{python}
 # show number of records
-run_sql_and_return_df(cnx, """
-select count(*) from wdi_country
+run_sql_and_return_html(cnx,"""
+SELECT COUNT(*) FROM wdi_country
 """)
 ```
 
 ## Task 5
 
-```{python}
-## create local wdi data table using world_bank_data.wdi_data
-## (skills: create table)
-
-# drop table
-execute_ddl(cnx, """
-drop table if exists wdi_data;
-""")
-```
+According to the World Bank, in 2020 there were how many countries in the world?
 
 ```{python}
-run_sql_and_return_df(cnx, """
-show tables;
+## (skills: select, aggregate)
+
+run_sql_and_return_html(cnx,"""
+SELECT COUNT(*) AS country_count_2020 FROM wdi_country WHERE Region IS NOT NULL;
 """)
 ```
 
 ## Task 6
 
-```{python}
-## create local table of series table using world_bank_data.wdi_series
-## The series table contains information
-## about the data that you're using.
-## (skills: create table)
-
-# drop table
-execute_ddl(cnx, """
-drop table if exists wdi_series;
-""")
-```
+What are all unique values of region in the wdi_country table?
 
 ```{python}
-execute_ddl(cnx, """
-create table wdi_series as
-select * from world_bank_data.wdi_series;
-""")
-```
+## Let's investigate the country_region field.
+## What is the domain of the country_region field? That is,
+## what are the unique values found there?
+## (there are several possible ways to code this in SQL)
+## (skills: select, aggregate, order by)
 
-```{python}
-run_sql_and_return_df(cnx, """
-show tables;
+run_sql_and_return_html(cnx,"""
+SELECT DISTINCT Region FROM wdi_country;
 """)
+
 ```
 
 ## Task 7
+
+How many countries are in each region?
 
 ```{python}
 ## How many countries are in each region?
 ## (skills: select, aggregate, group by, order by)
 
-run_sql_and_return_df(cnx,"""
-select 
-    region as "Region",
-    count(*) as "Number of Countries"
-from
-    wdi_country
-where 
-    region is not null
-group by
-    region
-order by
-    "Number of Countries" desc;
+run_sql_and_return_html(cnx,"""
+SELECT COUNT(*), Region FROM wdi_country GROUP BY Region;
 """)
 
 ```
@@ -205,16 +181,8 @@ List the country full names and regions for all countries in north america.
 ## List the country full names and regions for all countries in north america
 ## (skills: select, where, order by)
 
-run_sql_and_return_df(cnx,"""
-select
-    `Long Name` as "Country Full Name",
-    region as "Region"
-from
-    wdi_country
-where
-    region = 'North America'
-order by
-    `Long Name`;
+run_sql_and_return_html(cnx,"""
+SELECT `Long Name`, Region FROM wdi_country WHERE Region = "North America";
 """)
 
 ```
@@ -226,15 +194,8 @@ order by
 ## What region contains Qatar?  List the region, country short name and full name
 ## (skills: select, where)
 
-run_sql_and_return_df(cnx,"""
-select
-    region as "Region",
-    `Short Name` as "Country Short Name",
-    `Long Name` as "Country Full Name"
-from
-    wdi_country
-where
-    `Short Name` = 'Qatar';
+run_sql_and_return_html(cnx,"""
+SELECT Region, `Short Name`, `Long Name` FROM wdi_country WHERE `Short Name`= "Qatar";
 """)
 
 ```
@@ -247,19 +208,8 @@ where
 ## where the abbr and wb_abbr are different.
 ## (skills: select, where, order by)
 
-run_sql_and_return_df(cnx,"""
-select
-    `Country Code` as "Country Code",
-    `Short Name` as "Country Short Name",
-    `2-alpha code` as "Abbreviation",
-    `WB-2 code` as "World Bank Abbreviation",
-    region as "Region"
-from
-    wdi_country
-where
-    `2-alpha code` <> `WB-2 code`
-order by
-    `Short Name`;
+run_sql_and_return_html(cnx,"""
+SELECT `Country Code`, `Short Name`, `2-alpha code`, `WB-2 code`, Region FROM wdi_country WHERE `2-alpha code` != `WB-2 code`;
 """)
 
 ```
@@ -272,17 +222,10 @@ order by
 ## income category in descending order of most countries to least.
 ## (skills: select, aggregate, group by, order by)
 
-run_sql_and_return_df(cnx,"""
-select
-    `Income Group` as "Income Category",
-    count(*) as "Number of Countries"
-from
-    wdi_country
-group by
-    `Income Group`
-order by
-    "Number of Countries" desc;
+run_sql_and_return_html(cnx,"""
+SELECT COUNT(*), `Income Group` FROM wdi_country GROUP BY `Income Group` ORDER BY COUNT(*) DESC;
 """)
+
 ```
 
 ## Task 12
@@ -294,17 +237,8 @@ order by
 ## you will be scored on the number of records returned and the value(s) 
 ## in the first column.
 
-run_sql_and_return_df(cnx,"""
-select
-    `Short Name` as "Country Short Name",
-    `Income Group` as "Income Category",
-    `WB-2 Code` as "WB-2 Code"
-from
-    wdi_country
-where
-    `Income Group` is NULL
-order by
-    `Short Name`;
+run_sql_and_return_html(cnx,"""
+SELECT `Short Name`, `Long Name`, `Income Group` FROM wdi_country WHERE Region IS NOT NULL AND `Income Group` IS NULL;
 """)
 
 ```
@@ -318,30 +252,21 @@ order by
 ## NOTE - if you get this wrong, all subsequent tables will be wrong!
 
 execute_ddl(cnx,"""
-update
-    wdi_country
-set 
-    `Income Group` = "High Income"
-where
-    `Short Name` = "Venezuela"; 
+UPDATE wdi_country
+SET `Income Group` = 'High income'
+WHERE `Short Name` = 'Venezuela';
 commit;
 """)
+
+
 ```
-
-
 ```{python}
 ## Now, display the country again to verify the change stuck!
 
-run_sql_and_return_df(cnx,"""
-select
-    `Short Name` as "Country Short Name",
-    region,
-    `Income Group` as "Income Category"
-from
-    wdi_country
-where
-    `Short Name` = "Venezuela";
+run_sql_and_return_html(cnx,"""
+SELECT `Short Name`, `Long Name`, `Income Group` FROM wdi_country WHERE `Short Name`= "Venezuela";
 """)
+
 ```
 
 ## Task 14
@@ -352,15 +277,8 @@ where
 ## region, income group, and no.of.countries.
 ## (skills: select, aggregate, group by, order by)
 
-run_sql_and_return_df(cnx,"""
-select
-    region as "Region",
-    `Income Group` as "Income Category",
-    count(*) as "Number of Countries"
-from
-    wdi_country
-group by
-    region, `Income Group`
+run_sql_and_return_html(cnx,"""
+SELECT Region, `Income Group`, COUNT(*) AS "no.of.countries" FROM wdi_country WHERE Region IS NOT NULL AND `Income Group` IS NOT NULL GROUP BY Region, `Income Group` ORDER BY Region DESC;
 """)
 
 ```
@@ -380,20 +298,19 @@ group by
 ## and a column for the row totals.
 ## (skills: select, aggregate, group by, nested query)
 
-run_sql_and_return_df(cnx,"""
-select
-    region as "Region",
-    sum(case when `Income Group` = 'High income' then 1 else 0 end) as "High Income",
-    sum(case when `Income Group` = 'Upper middle income' then 1 else 0 end) as "Upper Middle Income",
-    sum(case when `Income Group` = 'Lower middle income' then 1 else 0 end) as "Lower Middle Income",
-    sum(case when `Income Group` = 'Low income' then 1 else 0 end) as "Low Income",
-    cast(count(*) as decimal(10,1)) as "Row Total"
-from
-    wdi_country
-group by
-    region
+run_sql_and_return_html(cnxw, """
+SELECT 
+  Region,
+  CAST(COUNT(CASE WHEN `Income Group` = 'High income' THEN 1 END) AS DECIMAL(4,1)) AS "High income",
+  CAST(COUNT(CASE WHEN `Income Group` = 'Upper middle income' THEN 1 END) AS DECIMAL(4,1)) AS "Upper middle income",
+  CAST(COUNT(CASE WHEN `Income Group` = 'Lower middle income' THEN 1 END) AS DECIMAL(4,1)) AS "Lower middle income",
+  CAST(COUNT(CASE WHEN `Income Group` = 'Low income' THEN 1 END) AS DECIMAL(4,1)) AS "Low income",
+  CAST(COUNT(*) AS DECIMAL(4,1)) AS "Total Countries"
+FROM wdi_country
+WHERE Region IS NOT NULL
+GROUP BY Region
+ORDER BY Region;
 """)
-
 ```
 
 ## Task 16
@@ -410,17 +327,10 @@ group by
 ## PUT THE NUMBER FIRST! (use: count, region name, income group)
 ## (skills: select, aggregate, group by, nested query, order by, limit)
 
-run_sql_and_return_df(cnx,"""
-select
-    count(*) as "Number of Low-Income Countries",
-    region as "Region"
-from
-    wdi_country
-where
-    `Income Group` = 'Low income'
-group by
-    region
+run_sql_and_return_html(cnx,"""
+SELECT COUNT(*) AS count, Region, `Income Group` FROM wdi_country WHERE `Income Group` = 'Low income' AND Region IS NOT NULL GROUP BY Region, `Income Group` ORDER BY count DESC LIMIT 1;
 """)
+
 ```
 
 ## Task 17
@@ -434,17 +344,8 @@ group by
 ## the country code for the Marshall Islands is MHL.
 ## (skills: select, where, subquery)
 
-run_sql_and_return_df(cnx,"""
-select
-    `Country Code` as "Country Code",
-    `Short Name` as "Country Short Name",
-    region as "Region",
-    `Income Group` as "Income Category"
-from
-    wdi_country
-where
-    region = (select region from wdi_country where `Country Code` = 'MHL')
-    and `Income Group` = (select `Income Group` from wdi_country where `Country Code` = 'MHL')
+run_sql_and_return_html(cnx,"""
+SELECT `Country Code`, `Short Name`, Region, `Income Group` FROM wdi_country WHERE Region = ( SELECT Region FROM wdi_country WHERE `Country Code` = 'MHL' ) AND `Income Group` = ( SELECT `Income Group` FROM wdi_country WHERE `Country Code` = 'MHL' ) ORDER BY `Short Name`;
 """)
 
 ```
@@ -468,26 +369,27 @@ where
 ## in Task 14.  (FYI - I get 6 rows in my final table.)
 ## (skills: select, where, subqueries, joins)
 
-run_sql_and_return_df(cnx,"""
-select 
-  r.region as "Region",
-  i.`Income Group` as "Income Group",
-  count(c.`Short Name`) as "Number of Countries"
-from 
-  (select distinct region from wdi_country) r
-cross join 
-  (select distinct `Income Group` from wdi_country) i
-left join 
-  wdi_country c
-on 
-  r.region = c.region and i.`Income Group` = c.`Income Group`
-group by 
-  r.region, i.`Income Group`
-having 
-  count(c.`Short Name`) = 0
-order by 
-  r.region, i.`Income Group`;
+run_sql_and_return_html(cnx, """
+WITH all_combinations AS (
+  SELECT DISTINCT r.Region, i.`Income Group`
+  FROM wdi_country r
+  CROSS JOIN wdi_country i
+  WHERE r.Region IS NOT NULL AND i.`Income Group` IS NOT NULL
+),
+existing_pairs AS (
+  SELECT Region, `Income Group`
+  FROM wdi_country
+  WHERE Region IS NOT NULL AND `Income Group` IS NOT NULL
+  GROUP BY Region, `Income Group`
+)
+SELECT ac.Region, ac.`Income Group`, 0 AS Count
+FROM all_combinations ac
+LEFT JOIN existing_pairs ep
+  ON ac.Region = ep.Region AND ac.`Income Group` = ep.`Income Group`
+WHERE ep.Region IS NULL
+ORDER BY ac.Region, ac.`Income Group`;
 """)
+
 
 ```
 
@@ -509,44 +411,8 @@ order by
 ## slam dunk after this!
 ## (skills: select, where, subqueries, joins, aggregate functions)
 
-run_sql_and_return_df(cnx,"""
-with region_cte as (
-    select region, count(*) as region_cnt 
-    from wdi_country 
-    group by region
-), income_cte as (
-    select `Income Group`, count(*) as income_cnt 
-    from wdi_country 
-    group by `Income Group`
-), total_cte as (
-    select count(*) as total_cnt 
-    from wdi_country
-), pair_cte as (
-    select 
-        region,
-        `Income Group`,
-        count(*) as pair_cnt
-    from 
-        wdi_country
-    group by 
-        region, 
-        `Income Group`
-), merge_cte as (
-    select 
-        a.region,
-        a.`Income Group`,
-        pair_cnt,
-        region_cnt,
-        income_cnt,
-        total_cnt,
-        round(100.0 * pair_cnt / total_cnt, 1) as "Pct of Total"
-    from 
-        pair_cte a
-        left join region_cte b on (a.region = b.region)
-        left join income_cte c on (a.`Income Group` = c.`Income Group`),
-        total_cte d
-)
-select * from merge_cte
+run_sql_and_return_html(cnx,"""
+SELECT Region, `Income Group`, COUNT(*) AS country_count, (SELECT COUNT(*) FROM wdi_country AS r WHERE r.Region = c.Region AND r.Region IS NOT NULL) AS region_total, (SELECT COUNT(*) FROM wdi_country AS i WHERE i.`Income Group` = c.`Income Group` AND i.`Income Group` IS NOT NULL) AS income_group_total, (SELECT COUNT(*) FROM wdi_country WHERE Region IS NOT NULL AND `Income Group` IS NOT NULL) AS total_countries, ROUND( COUNT(*) * 100.0 / (SELECT COUNT(*) FROM wdi_country WHERE Region IS NOT NULL AND `Income Group` IS NOT NULL), 2 ) AS percent_of_total FROM wdi_country AS c WHERE Region IS NOT NULL AND `Income Group` IS NOT NULL GROUP BY Region, `Income Group` ORDER BY percent_of_total DESC;
 """)
 
 
@@ -559,55 +425,38 @@ select * from merge_cte
 ## print table similar to the table in Task 15, with Income group in the
 ## columns, Region in the rows and Percent of total in each cell of the table.
 
-run_sql_and_return_df(cnx,"""
-with region_cte as (
-    select region, count(*) as region_cnt 
-    from wdi_country 
-    group by region
-), income_cte as (
-    select `Income Group`, count(*) as income_cnt 
-    from wdi_country 
-    group by `Income Group`
-), total_cte as (
-    select count(*) as total_cnt 
-    from wdi_country
-), pair_cte as (
-    select 
-        region,
-        `Income Group`,
-        count(*) as pair_cnt
-    from 
-        wdi_country
-    group by 
-        region, 
-        `Income Group`
-), merge_cte as (
-    select 
-        a.region,
-        a.`Income Group`,
-        pair_cnt,
-        region_cnt,
-        income_cnt,
-        total_cnt,
-        100.0 * pair_cnt / total_cnt as pct
-    from 
-        pair_cte a
-        left join region_cte b on (a.region = b.region)
-        left join income_cte c on (a.`Income Group` = c.`Income Group`),
-        total_cte d
+run_sql_and_return_html(cnx, """
+WITH region_income_counts AS (
+  SELECT 
+    Region,
+    `Income Group`,
+    COUNT(*) AS country_count
+  FROM wdi_country
+  WHERE Region IS NOT NULL AND `Income Group` IS NOT NULL
+  GROUP BY Region, `Income Group`
+),
+region_totals AS (
+  SELECT 
+    Region,
+    COUNT(*) AS total_countries
+  FROM wdi_country
+  WHERE Region IS NOT NULL AND `Income Group` IS NOT NULL
+  GROUP BY Region
 )
-select 
-    region,
-    round(sum(case when `Income Group` = 'Low income' then pct else 0 end), 1) as "Low Income",
-    round(sum(case when `Income Group` = 'Lower middle income' then pct else 0 end), 1) as "Lower Middle Income",
-    round(sum(case when `Income Group` = 'Upper middle income' then pct else 0 end), 1) as "Upper Middle Income",
-    round(sum(case when `Income Group` = 'High income' then pct else 0 end), 1) as "High Income",
-    round(sum(pct), 1) as "Row Total"
-from 
-    merge_cte
-group by 
-    region;
+
+SELECT 
+  rt.Region,
+  ROUND(COALESCE(SUM(CASE WHEN ric.`Income Group` = 'High income' THEN ric.country_count ELSE 0 END) * 100.0 / rt.total_countries, 0), 2) AS High_income,
+  ROUND(COALESCE(SUM(CASE WHEN ric.`Income Group` = 'Upper middle income' THEN ric.country_count ELSE 0 END) * 100.0 / rt.total_countries, 0), 2) AS Upper_middle_income,
+  ROUND(COALESCE(SUM(CASE WHEN ric.`Income Group` = 'Lower middle income' THEN ric.country_count ELSE 0 END) * 100.0 / rt.total_countries, 0), 2) AS Lower_middle_income,
+  ROUND(COALESCE(SUM(CASE WHEN ric.`Income Group` = 'Low income' THEN ric.country_count ELSE 0 END) * 100.0 / rt.total_countries, 0), 2) AS Low_income,
+  ROUND(100.0, 2) AS Row_Total_Percent
+FROM region_totals rt
+LEFT JOIN region_income_counts ric ON rt.Region = ric.Region
+GROUP BY rt.Region, rt.total_countries
+ORDER BY rt.Region;
 """)
+
 
 ```
 
@@ -620,19 +469,30 @@ group by
 
 ## (This is much simpler than task 20!)
 
-run_sql_and_return_df(cnx,"""
-select
-    `Income Group` as "Income Category",
-    count(*) as "Number of Countries",
-    (select count(*) from wdi_country) as "Total Count",
-    round(count(*) * 100.0 / (select count(*) from wdi_country), 1) as "Percent of Total"
-from
-    wdi_country
-group by
-    `Income Group`
-order by
-    "Income Category";
+run_sql_and_return_html(cnx,"""
+WITH income_counts AS (
+  SELECT 
+    `Income Group`,
+    COUNT(*) AS country_count
+  FROM wdi_country
+  WHERE `Income Group` IS NOT NULL
+  GROUP BY `Income Group`
+),
+total_count AS (
+  SELECT COUNT(*) AS total
+  FROM wdi_country
+  WHERE `Income Group` IS NOT NULL
+)
+
+SELECT 
+  ic.`Income Group`,
+  ic.country_count,
+  t.total,
+  ROUND(ic.country_count * 100.0 / t.total, 1) AS percent_of_total
+FROM income_counts ic, total_count t
+ORDER BY percent_of_total DESC;
 """)
+
 
 ```
 
@@ -641,16 +501,19 @@ order by
 
 1. Reflect on the SQL skills you used throughout these exercises. Which skills do you feel most confident in, and which do you think need more practice? How has this assignment helped you build or reinforce specific SQL competencies?
 
-( response goes here)
+Throughout this assignment, I used a variety of SQL skills including basic SELECT queries, filtering with WHERE, aggregating with GROUP BY, joining tables, and using Common Table Expressions (CTEs). I feel most confident in writing simple queries that involve selecting, filtering, and basic aggregations. I also feel more comfortable with ORDER BY and using functions like COUNT().
+However, I need more practice with writing more complex queries involving CTEs, especially when nesting multiple CTEs together, like in Tasks 18, 19, and 20. This assignment helped reinforce how important it is to carefully plan queries step-by-step, especially when dealing with aggregation and joins. It also showed me how SQL can be used not just to retrieve data, but to transform and summarize it for analysis.
 
 2. Problem-Solving Approach: Describe your approach to tackling the more complex tasks (like Tasks 18, 23, and 24). How did you break down these problems, and what steps did you take when you encountered challenges? How would you approach a similar problem differently in the future?
 
-( response goes here)
+For the more complex tasks, I broke down each problem into smaller steps. First, I carefully re-read the problem statement to understand exactly what was being asked. Then, I thought about how I could build the query one piece at a time: starting with a basic SELECT, then adding GROUP BY, and finally building CTEs if necessary.
+Whenever I got stuck, I simplified the query and tested it at each step before adding more layers. If I had to approach a similar problem again, I would sketch out the tables and expected output on paper first before writing SQL. This would help avoid confusion when combining multiple steps together. I also learned that running small pieces of the query before combining them into a big query made it much easier to find and fix mistakes.
 
 
 3. Learning Takeaways: Consider the overall learning experience from this assignment. What were the biggest takeaways about working with SQL for data analysis and transformation? How do you think these skills will apply in real-world scenarios or future coursework?
 
-( response goes here)
+One of the biggest takeaways from this assignment is understanding how powerful SQL is for data analysis and transformation. SQL is not just about pulling raw data — it’s about grouping, summarizing, and reshaping data to answer real-world questions. I also learned that when working with real datasets, there are often missing values or non-standard entries, and it’s important to know how to handle them correctly.
+These skills will definitely apply in future coursework where I need to work with larger datasets. In real-world jobs, especially those involving data analysis, business intelligence, or database management, being able to write clean and efficient SQL queries will be critical. This assignment gave me a strong foundation to build on for more advanced SQL work.
 
 
 # README
